@@ -6,6 +6,7 @@ import (
 	"text/template"
 
 	"github.com/fatih/structtag"
+	"github.com/ptcar2009/avro-generator/tmpl"
 )
 
 func ASTNodeToAvro(name string, n types.Type) string {
@@ -37,7 +38,7 @@ func pointerToAvro(p *types.Pointer) string {
 	k := struct{ Type string }{
 		ASTNodeToAvro("", p.Elem()),
 	}
-	tmp, err := template.New("pointer.tmpl").ParseGlob("*.tmpl")
+	tmp, err := template.New("pointer.tmpl").Parse(tmpl.PointerTemplate)
 	if err != nil {
 		panic(err)
 	}
@@ -53,7 +54,7 @@ func arrayToAvro(p *types.Array) string {
 	k := struct{ Type string }{
 		ASTNodeToAvro("", p.Elem()),
 	}
-	tmp, err := template.New("array.tmpl").ParseGlob("*.tmpl")
+	tmp, err := template.New("array.tmpl").Parse(tmpl.ArrayTemplate)
 	if err != nil {
 		panic(err)
 	}
@@ -70,7 +71,7 @@ func sliceToAvro(p *types.Slice) string {
 	k := struct{ Type string }{
 		ASTNodeToAvro("", p.Elem()),
 	}
-	tmp, err := template.New("array.tmpl").ParseGlob("*.tmpl")
+	tmp, err := template.New("array.tmpl").Parse(tmpl.ArrayTemplate)
 	if err != nil {
 		panic(err)
 	}
@@ -107,7 +108,7 @@ func structToAvro(name string, s *types.Struct) string {
 			Type: n,
 		})
 	}
-	tmp, err := template.New("struct.tmpl").ParseGlob("*.tmpl")
+	tmp, err := template.New("struct.tmpl").Parse(tmpl.StructTemplate)
 	if err != nil {
 		panic(err)
 	}
