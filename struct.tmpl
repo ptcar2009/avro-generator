@@ -1,0 +1,1 @@
+{"name":"{{.Name}}","type":"record","fields":[{{ range $index, $element := .Fields }}{{if $index}},{{end}}{"name":"{{- $element.Name -}}","type":{{- $element.Type -}}}{{end}}]}
