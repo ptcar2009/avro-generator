@@ -1,1 +1,0 @@
-{"name":"Testing","type":"record","fields":[{"name":"other","type":["null",{"name":"Other","type":"record","fields":[{"name":"field","type":"int"}]}]},{"name":"Inline","type":{"name":"Inline","type":"record","fields":[{"name":"other","type":"int"}]}},{"name":"K","type":"int"},{"name":"Opa","type":{"type":"array","items":"int","default":[]}}]}
