@@ -7,7 +7,7 @@ import (
 	"text/template"
 
 	"github.com/fatih/structtag"
-	"github.com/ptcar2009/avro-generator/tmpl"
+	"github.com/ptcar2009/avro-generator/pkg/tmpl"
 )
 
 var resolvedTypes map[string]bool = make(map[string]bool)
