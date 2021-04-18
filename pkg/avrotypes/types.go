@@ -2,12 +2,15 @@ package avrotypes
 
 import (
 	"bytes"
+	"fmt"
 	"go/types"
 	"text/template"
 
 	"github.com/fatih/structtag"
 	"github.com/ptcar2009/avro-generator/tmpl"
 )
+
+var resolvedTypes map[string]bool = make(map[string]bool)
 
 func ASTNodeToAvro(name string, n types.Type) string {
 	switch t := n.(type) {
@@ -23,6 +26,8 @@ func ASTNodeToAvro(name string, n types.Type) string {
 		return arrayToAvro(t)
 	case *types.Slice:
 		return sliceToAvro(t)
+	case *types.Map:
+		return mapToAvro(t)
 	}
 	return ""
 }
@@ -51,6 +56,9 @@ func pointerToAvro(p *types.Pointer) string {
 
 }
 func arrayToAvro(p *types.Array) string {
+	if p.Elem().String() == "byte" {
+		return "\"bytes\""
+	}
 	k := struct{ Type string }{
 		ASTNodeToAvro("", p.Elem()),
 	}
@@ -68,6 +76,9 @@ func arrayToAvro(p *types.Array) string {
 }
 
 func sliceToAvro(p *types.Slice) string {
+	if p.Elem().String() == "byte" {
+		return "\"bytes\""
+	}
 	k := struct{ Type string }{
 		ASTNodeToAvro("", p.Elem()),
 	}
@@ -83,7 +94,30 @@ func sliceToAvro(p *types.Slice) string {
 	return buf.String()
 
 }
+func mapToAvro(p *types.Map) string {
+	if p.Key().String() != "string" {
+		return ""
+	}
+	k := struct{ Type string }{
+		ASTNodeToAvro("", p.Elem()),
+	}
+	tmp, err := template.New("map.tmpl").Parse(tmpl.MapTemplate)
+	if err != nil {
+		panic(err)
+	}
+	buf := bytes.NewBufferString("")
+	err = tmp.Execute(buf, k)
+	if err != nil {
+		panic(err)
+	}
+	return buf.String()
+
+}
 func structToAvro(name string, s *types.Struct) string {
+	if _, ok := resolvedTypes[name]; ok {
+		return fmt.Sprintf("\"%s\"", name)
+	}
+	resolvedTypes[name] = true
 	var results structFields
 	results.Name = name
 	for i := 0; i < s.NumFields(); i++ {
@@ -121,10 +155,6 @@ func structToAvro(name string, s *types.Struct) string {
 	return buf.String()
 }
 
-// func astStarToAvro(s *ast.StarExpr) (string, error) {
-
-// }
-
 func basicTypeToAvro(i *types.Basic) string {
 	switch i.String() {
 	case "int":
@@ -137,8 +167,10 @@ func basicTypeToAvro(i *types.Basic) string {
 		return "\"string\""
 	case "bool":
 		return "\"boolean\""
+	case "long":
+		return "\"long\""
 	default:
-		panic("invalid type")
+		return ""
 	}
 
 }
